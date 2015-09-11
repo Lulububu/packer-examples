@@ -8,12 +8,8 @@
     "isoUrl":"http://centos.serverspace.co.uk/centos/7/isos/x86_64/CentOS-7-x86_64-DVD-1503-01.iso",
     "osType": "RedHat_64",
     "ssh_username": "packer",
-    "ssh_password": "packerPassword"
-  },
-  "push": {
-    "name": "whamondg/{{user `hostname`}}",
-    "token": "{{user `atlas_token`}}",
-    "vcs": true
+    "ssh_password": "packerPassword",
+    "atlas_name": "whamondg/{{user `hostname`}}",
   },
   "builders": [
     {
@@ -34,7 +30,7 @@
         ]
       ],
       "disk_size": 40960,
-	  
+
       "boot_wait": "10s",
       "boot_command": [
         "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `distributionName`}}/ks.cfg<enter><wait>"
@@ -46,7 +42,7 @@
       "iso_checksum": "{{user `iso_checksum`}}",
       "iso_checksum_type": "{{user `iso_checksum_type`}}",
       "iso_url": "{{user `isoUrl`}}",
-      "output_directory": "{{user `buildDir`}}/packer-virtualbox-{{user `hostname`}}", 
+      "output_directory": "{{user `buildDir`}}/packer-virtualbox-{{user `hostname`}}",
       "shutdown_command": "sudo /sbin/halt -h -p",
       "ssh_username": "{{user `ssh_username`}}",
       "ssh_password": "{{user `ssh_password`}}",
@@ -64,11 +60,16 @@
       ]
     }
   ],
+  "push": {
+    "name": "{{user `atlas_name`}}",
+    "token": "{{user `atlas_token`}}",
+    "vcs": true
+  },
   "post-processors": [
     {
       "type": "atlas",
       "token": "{{user `atlas_token`}}",
-      "artifact": "sky-uk/{{user `hostname`}}",
+      "artifact": "{{user `atlas_name`}}",
       "artifact_type": "amazon.ami",
       "metadata": {
         "created_at": "{{timestamp}}"
