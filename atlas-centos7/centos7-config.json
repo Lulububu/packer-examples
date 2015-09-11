@@ -1,0 +1,80 @@
+{
+  "variables": {
+    "buildDir": "./build",
+    "hostname": "centos7-basebox",
+    "distributionName": "CentOS-7-x86_64",
+    "iso_checksum": "85bcf62462fb678adc0cec159bf8b39ab5515404bc3828c432f743a1b0b30157",
+    "iso_checksum_type": "sha256",
+    "isoUrl":"http://centos.serverspace.co.uk/centos/7/isos/x86_64/CentOS-7-x86_64-DVD-1503-01.iso",
+    "osType": "RedHat_64",
+    "ssh_username": "packer",
+    "ssh_password": "packerPassword"
+  },
+  "push": {
+    "name": "sky-uk/{{user `hostname`}}",
+    "token": "{{user `atlas_token`}}",
+    "vcs": true
+  },
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "virtualbox_version_file": "/tmp/.vbox_version",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "512"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "1"
+        ]
+      ],
+      "disk_size": 40960,
+	  
+      "boot_wait": "10s",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `distributionName`}}/ks.cfg<enter><wait>"
+      ],
+      "guest_additions_mode": "disable",
+      "guest_os_type": "{{user `osType`}}",
+      "headless": "false",
+      "http_directory": "http",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_url": "{{user `isoUrl`}}",
+      "output_directory": "{{user `buildDir`}}/packer-virtualbox-{{user `hostname`}}", 
+      "shutdown_command": "sudo /sbin/halt -h -p",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_password": "{{user `ssh_password`}}",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "30m",
+      "vm_name": "packer-virtualbox-{{user `hostname`}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "{{.Vars}} sudo -E bash '{{.Path}}'",
+      "scripts": [
+	    "scripts/update.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "atlas",
+      "token": "{{user `atlas_token`}}",
+      "artifact": "sky-uk/{{user `hostname`}}",
+      "artifact_type": "amazon.ami",
+      "metadata": {
+        "created_at": "{{timestamp}}"
+      }
+    }
+  ]
+}
+
+
