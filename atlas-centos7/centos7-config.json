@@ -9,7 +9,7 @@
     "osType": "RedHat_64",
     "ssh_username": "packer",
     "ssh_password": "packerPassword",
-    "atlas_name": "whamondg/{{user `hostname`}}",
+    "atlas_name": "whamondg/{{user `hostname`}}"
   },
   "builders": [
     {
