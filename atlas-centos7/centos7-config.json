@@ -11,7 +11,7 @@
     "ssh_password": "packerPassword"
   },
   "push": {
-    "name": "sky-uk/{{user `hostname`}}",
+    "name": "whamondg/{{user `hostname`}}",
     "token": "{{user `atlas_token`}}",
     "vcs": true
   },
