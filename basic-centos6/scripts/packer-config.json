@@ -1,0 +1,67 @@
+{
+  "variables": {
+    "buildDir": "./build",
+    "hostname": "centos-basebox",
+
+    "distributionName": "centos-6.5-x86_64",
+    "iso_checksum": "a63241b0f767afa1f9f7e59e6f0f00d6b8d19ed85936a7934222c03a92e61bf3",
+    "iso_checksum_type": "sha256",
+    "isoUrl": "http://mirror.ox.ac.uk/sites/mirror.centos.org/6.6/isos/x86_64/CentOS-6.6-x86_64-bin-DVD1.iso",  
+	"osType": "RedHat_64",
+	
+    "ssh_username": "packer",
+    "ssh_password": "packerPassword"
+  },
+  "builders": [
+    {
+	  "type": "virtualbox-iso",
+      "virtualbox_version_file": "/tmp/.vbox_version",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "512"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "1"
+        ]
+      ],
+      "disk_size": 40960,
+	  
+      "boot_wait": "10s",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `distributionName`}}/ks.cfg<enter><wait>"
+      ],
+      "guest_additions_mode": "upload",
+	  "guest_additions_path": "/tmp/VBoxGuestAdditions_{{.Version}}.iso",
+      "guest_os_type": "{{user `osType`}}",
+      "headless": "false",
+      "http_directory": "http",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_url": "{{user `isoUrl`}}",
+      "output_directory": "{{user `buildDir`}}/packer-virtualbox-{{user `hostname`}}", 
+      "shutdown_command": "sudo /sbin/halt -h -p",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_password": "{{user `ssh_password`}}",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "30m",
+      "vm_name": "packer-virtualbox-{{user `hostname`}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "{{.Vars}} sudo -E bash '{{.Path}}'",
+      "scripts": [
+	    "scripts/buildVirtualBoxAdditions.sh"
+      ]
+    }
+  ]
+}
+
+
